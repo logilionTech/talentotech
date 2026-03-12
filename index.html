@@ -581,6 +581,35 @@
       resize: vertical;
     }
 
+    /* COMENTARIOS */
+    .comment-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .comment-item h4 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    .comment-item .date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .comment-item p {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
     /* FOOTER */
     .footer {
       background: #0a0a0a;
@@ -708,6 +737,7 @@
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#proceso">Proceso</a></li>
           <li><a href="#faq">FAQ</a></li>
+          <li><a href="#comentarios">Comentarios</a></li>
           <li><a href="#contacto">Contacto</a></li>
           <li><a href="#contacto" class="btn btn-outline">Agendar cita</a></li>
         </ul>
@@ -895,6 +925,79 @@
       </div>
     </section>
 
+    <!-- COMENTARIOS -->
+    <section id="comentarios" class="section" style="background: rgba(80,26,200,0.02);">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-subtitle">comunidad</div>
+          <h2 class="section-title">Lo que dicen nuestros <span>visitantes</span></h2>
+          <p class="section-description">Déjanos tu opinión o lee lo que otros han comentado sobre nuestro trabajo.</p>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-form" id="authSection">
+            <!-- Vista de Login -->
+            <div id="loginView">
+              <h3 style="margin-bottom: 1.5rem;">Inicia sesión para comentar</h3>
+              <form id="loginForm">
+                <div class="form-group">
+                  <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+                </div>
+                <div class="form-group">
+                  <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;"
+                  id="btnLogin">Iniciar sesión</button>
+                <p style="text-align: center; color: var(--text-muted); cursor: pointer; text-decoration: underline;"
+                  id="toggleToSignup">¿No tienes cuenta? Regístrate</p>
+              </form>
+            </div>
+
+            <!-- Vista de Registro -->
+            <div id="signupView" style="display: none;">
+              <h3 style="margin-bottom: 1.5rem;">Crear cuenta</h3>
+              <form id="signupForm">
+                <div class="form-group">
+                  <input type="text" id="signupName" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                  <input type="email" id="signupEmail" placeholder="Correo electrónico" required>
+                </div>
+                <div class="form-group">
+                  <input type="password" id="signupPassword" placeholder="Contraseña (mínimo 6 caracteres)" required
+                    minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;"
+                  id="btnSignup">Registrarse</button>
+                <p style="text-align: center; color: var(--text-muted); cursor: pointer; text-decoration: underline;"
+                  id="toggleToLogin">¿Ya tienes cuenta? Inicia sesión</p>
+              </form>
+            </div>
+
+            <!-- Vista de Inserción de Comentario (Solo Auth) -->
+            <div id="commentInputView" style="display: none;">
+              <h3 style="margin-bottom: 0.5rem;">Deja un comentario</h3>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <span id="currentUserDisplay" style="color: var(--accent); font-size: 0.9rem;"></span>
+                <button id="btnLogout"
+                  style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.9rem; text-decoration:underline;">Cerrar
+                  sesión</button>
+              </div>
+              <form id="commentForm">
+                <div class="form-group">
+                  <textarea rows="4" id="commentText" placeholder="Escribe tu comentario aquí..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="btnSubmitComment">Publicar
+                  comentario</button>
+              </form>
+            </div>
+          </div>
+          <div class="comments-list" id="commentsList"
+            style="max-height: 550px; overflow-y: auto; padding-right: 15px;">
+            <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Cargando comentarios...</p>
+          </div>
+        </div>
+    </section>
+
     <!-- CONTACTO -->
     <section id="contacto" class="section">
       <div class="container">
@@ -942,6 +1045,7 @@
         <a href="#servicios">Servicios</a>
         <a href="#proceso">Proceso</a>
         <a href="#faq">FAQ</a>
+        <a href="#comentarios">Comentarios</a>
         <a href="#contacto">Contacto</a>
       </div>
       <div class="footer-copy">
@@ -1034,6 +1138,260 @@
       });
     });
   </script>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Inicializar Supabase
+    const SUPABASE_URL = 'https://nspdyhsifmbiondagapf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_jdDSOQbqunDjrDraUbc_IA_WbTzKw5x';
+
+    // Función principal para asegurar que supabase esté cargado
+    function initSupabaseApp() {
+      if (!window.supabase) {
+        console.error('Supabase no se pudo cargar.');
+        document.getElementById('commentsList').innerHTML = '<p style="color: red; text-align: center;">Error de conexión.</p>';
+        return;
+      }
+
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      const commentsList = document.getElementById('commentsList');
+      const commentSubmitForm = document.getElementById('commentForm');
+      const btnSubmitComment = document.getElementById('btnSubmitComment');
+
+      // Elementos de Autenticación
+      const loginView = document.getElementById('loginView');
+      const signupView = document.getElementById('signupView');
+      const commentInputView = document.getElementById('commentInputView');
+
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+
+      const btnLogin = document.getElementById('btnLogin');
+      const btnSignup = document.getElementById('btnSignup');
+      const btnLogout = document.getElementById('btnLogout');
+      const currentUserDisplay = document.getElementById('currentUserDisplay');
+
+      let currentUser = null;
+
+      // Escuchar cambios de autenticación
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+          showCommentInputView();
+        } else {
+          currentUser = null;
+          showLoginView();
+        }
+      });
+
+      function showLoginView() {
+        loginView.style.display = 'block';
+        signupView.style.display = 'none';
+        commentInputView.style.display = 'none';
+      }
+
+      function showSignupView() {
+        loginView.style.display = 'none';
+        signupView.style.display = 'block';
+        commentInputView.style.display = 'none';
+      }
+
+      function showCommentInputView() {
+        loginView.style.display = 'none';
+        signupView.style.display = 'none';
+        commentInputView.style.display = 'block';
+
+        let userName = currentUser.email.split('@')[0];
+        if (currentUser.user_metadata && currentUser.user_metadata.full_name) {
+          userName = currentUser.user_metadata.full_name;
+        }
+        currentUserDisplay.textContent = `Hola, ${userName}`;
+      }
+
+      // Toggles
+      document.getElementById('toggleToSignup').addEventListener('click', showSignupView);
+      document.getElementById('toggleToLogin').addEventListener('click', showLoginView);
+
+      // Login con Email
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+        btnLogin.disabled = false;
+        btnLogin.innerHTML = 'Iniciar sesión';
+
+        if (error) {
+          alert('Error al iniciar sesión: ' + error.message);
+        } else {
+          loginForm.reset();
+        }
+      });
+
+      // Registro con Email
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        btnSignup.disabled = true;
+        btnSignup.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name
+            }
+          }
+        });
+
+        btnSignup.disabled = false;
+        btnSignup.innerHTML = 'Registrarse';
+
+        if (error) {
+          alert('Error al registrarse: ' + error.message);
+        } else {
+          alert('Registro exitoso. Por favor revisa tu correo electrónico para confirmar tu cuenta.');
+          signupForm.reset();
+          showLoginView();
+        }
+      });
+
+      // Cerrar Sesión
+      btnLogout.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+      });
+
+      // Función para formatear fecha
+      function formatDate(dateString) {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString('es-ES', options);
+      }
+
+      // Cargar comentarios
+      let allComments = [];
+      let commentsLimit = 3;
+
+      async function loadComments() {
+        try {
+          const { data, error } = await supabase
+            .from('comentarios')
+            .select('*')
+            .order('fecha', { ascending: false });
+
+          if (error) throw error;
+
+          allComments = data;
+          commentsLimit = 3; // Mostrar 3 por defecto
+          renderComments();
+        } catch (error) {
+          console.error('Error cargando comentarios:', error.message);
+          commentsList.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los comentarios.</p>';
+        }
+      }
+
+      function renderComments() {
+        commentsList.innerHTML = ''; // Limpiar div
+
+        if (allComments.length === 0) {
+          commentsList.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Aún no hay comentarios. ¡Sé el primero en opinar!</p>';
+          return;
+        }
+
+        const visibleComments = allComments.slice(0, commentsLimit);
+
+        visibleComments.forEach(item => {
+          const commentEl = document.createElement('div');
+          commentEl.className = 'comment-item';
+          commentEl.innerHTML = `
+            <h4>
+              ${item.nombre}
+              <span class="date">${formatDate(item.fecha)}</span>
+            </h4>
+            <p>${item.comentario}</p>
+          `;
+          commentsList.appendChild(commentEl);
+        });
+
+        // Mostrar botón "Ver más..." si hay comentarios ocultos
+        if (commentsLimit < allComments.length) {
+          const btnMore = document.createElement('button');
+          btnMore.className = 'btn btn-outline';
+          btnMore.style.width = '100%';
+          btnMore.style.marginTop = '1rem';
+          btnMore.textContent = 'Ver más...';
+          btnMore.onclick = () => {
+            // Aumentar en 3 el límite de comentarios cada vez que se presione
+            commentsLimit += 3;
+            renderComments();
+          };
+          commentsList.appendChild(btnMore);
+        }
+      }
+
+      // Insertar comentario
+      commentSubmitForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentUser) {
+          alert("Debes iniciar sesión para comentar");
+          return;
+        }
+
+        const textInput = document.getElementById('commentText');
+        const comentario = textInput.value.trim();
+
+        // Extraer nombre del usuario de la metadata
+        let nombre = currentUser.email.split('@')[0];
+        if (currentUser.user_metadata && currentUser.user_metadata.full_name) {
+          nombre = currentUser.user_metadata.full_name;
+        }
+
+        if (!comentario) return;
+
+        btnSubmitComment.disabled = true;
+        btnSubmitComment.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+
+        try {
+          const { error } = await supabase
+            .from('comentarios')
+            .insert([{ nombre, comentario }]);
+
+          if (error) throw error;
+
+          textInput.value = '';
+          alert('¡Comentario publicado con éxito!');
+          await loadComments();
+        } catch (error) {
+          console.error('Error publicando comentario:', error.message);
+          alert('Hubo un error al publicar tu comentario.');
+        } finally {
+          btnSubmitComment.disabled = false;
+          btnSubmitComment.innerHTML = 'Publicar comentario';
+        }
+      }, { passive: false });
+
+      // Cargar al inicio
+      loadComments();
+    }
+
+    // Ejecutar cuando el DOM esté listo o inmediatamente si ya cargó
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSupabaseApp);
+    } else {
+      initSupabaseApp();
+    }
+  </script>
+
   <script>
     (function () { if (!window.chatbase || window.chatbase("getState") !== "initialized") { window.chatbase = (...arguments) => { if (!window.chatbase.q) { window.chatbase.q = [] } window.chatbase.q.push(arguments) }; window.chatbase = new Proxy(window.chatbase, { get(target, prop) { if (prop === "q") { return target.q } return (...args) => target(prop, ...args) } }) } const onLoad = function () { const script = document.createElement("script"); script.src = "https://www.chatbase.co/embed.min.js"; script.id = "Er4WfNALkXTCQieSfTDko"; script.domain = "www.chatbase.co"; document.body.appendChild(script) }; if (document.readyState === "complete") { onLoad() } else { window.addEventListener("load", onLoad) } })();
   </script>
